@@ -7,16 +7,14 @@ import os.path
 import sys
 import time
 import urllib.error
-import urllib.parse
 import urllib.request
 from shutil import copytree
 from pathlib import Path
 from typing import Generator, Iterable, NamedTuple
 
-HERE = Path(os.path.dirname(os.path.abspath(__file__)))
-ROOT = HERE.parent
+HERE = Path.home() / "source/personal/advent-of-code-2025/aoc-python"
 
-YEAR = 2024
+YEAR = 2025
 
 
 @contextlib.contextmanager
@@ -37,7 +35,7 @@ def timing(name: str = "") -> Generator[None, None, None]:
 
 
 def _get_cookie_headers() -> dict[str, str]:
-    with open(os.path.join(HERE, "../.env")) as f:
+    with open(os.path.join(HERE, ".env")) as f:
         contents = f.read().strip()
     return {"Cookie": contents}
 
@@ -81,12 +79,12 @@ def download_input(day, daypath) -> int:
 def create_day(day):
     day_name = f"day{str(day).zfill(2)}"
 
-    if Path(ROOT / day_name).exists():
+    if Path(HERE / day_name).exists():
         raise ValueError(f"Directory for day {day_name} already exists")
 
-    copytree(str(ROOT / "day00"), str(ROOT / day_name))
+    copytree(str(HERE / "day00"), str(HERE / day_name))
 
-    download_input(day, ROOT / day_name)
+    download_input(day, HERE / day_name)
 
 
 def adjacent_4(x: int, y: int) -> Generator[tuple[int, int], None, None]:
