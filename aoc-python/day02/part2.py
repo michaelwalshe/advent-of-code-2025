@@ -15,8 +15,6 @@ def check_invalid_id(n: str) -> bool:
 
     return False
 
-check_invalid_id('11')
-
 def compute(s: str) -> int:
     invalid_ids = []
     for line in s.split(","):
