@@ -1,9 +1,9 @@
 import re
-from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-
 import pytest
+
+import z3
 
 import support
 
@@ -17,29 +17,35 @@ class Machine:
 
 
 def configure_machine(m: Machine) -> int:
-    seen = set()
-    queue = deque([(m.joltage, m.n_presses)])
-    while queue:
-        curr_joltage, curr_presses = queue.popleft()
-        for button_links in m.buttons:
-            next_joltage = tuple(
-                jolt + 1 if i in button_links else jolt
-                for i, jolt in enumerate(curr_joltage)
-            )
+    s = z3.Solver()
 
-            if any(
-                j_c > j_t for j_c, j_t in zip(next_joltage, m.joltage_target)
-            ):
-                continue
+    # Each button will be pressed an Int number of times
+    button_vars = [z3.FreshInt("b") for _ in m.buttons]
 
-            if next_joltage == m.joltage_target:
-                return curr_presses + 1
+    for bv in button_vars:
+        s.add(bv >= 0)
 
-            if next_joltage not in seen:
-                seen.add(next_joltage)
-                queue.append((next_joltage, curr_presses + 1))
+    for i, jolt in enumerate(m.joltage_target):
+        # For each output joltage, indicated by i
+        this_jolt_buttons = []
+        for j, b in enumerate(m.buttons):
+            if i in b:
+                # Check which input buttons will increment this output, add
+                # to list of variables
+                this_jolt_buttons.append(button_vars[j])
+        # Assert that sum of those button presses must equal output joltage
+        s.add(jolt == z3.Sum(this_jolt_buttons))
 
-    return 0
+    min_presses = -1
+    assert s.check() == z3.sat, "Unsolvable equation!"
+    while s.check() == z3.sat:
+        # Ensure minimal solution, add constraint of less than previous guess
+        # and return last solvable solution
+        model = s.model()
+        min_presses = sum(model[v].as_long() for v in model)
+        s.add(z3.Sum(button_vars) < min_presses)
+
+    return min_presses
 
 
 def compute(s: str) -> int:
