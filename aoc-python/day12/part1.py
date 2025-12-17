@@ -9,8 +9,6 @@ import support
 def compute(s: str) -> int:
     shapes_trees = s.split("\n\n")
 
-
-
     presents = []
     for shape_s in shapes_trees[:-1]:
         shape_lines = shape_s.splitlines()

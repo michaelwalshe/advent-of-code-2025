@@ -21,7 +21,7 @@ requires-dist = [
     { name = "numpy" },
     { name = "pytest" },
     { name = "shapely", specifier = ">=2.1.2" },
-    { name = "support", editable = "src" },
+    { name = "support", editable = "support" },
     { name = "z3-solver", specifier = ">=4.15.4.0" },
 ]
 
@@ -583,7 +583,7 @@ wheels = [
 [[package]]
 name = "support"
 version = "0.0.0"
-source = { editable = "src" }
+source = { editable = "support" }
 
 [[package]]
 name = "tornado"
